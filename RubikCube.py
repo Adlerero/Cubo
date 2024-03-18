@@ -1,3 +1,5 @@
+import random
+
 class Cube:
     def __init__(self):
         # Inicializa la configuración del cubo de Rubik
@@ -42,8 +44,78 @@ class Cube:
             self.back[i][0] = temp_col_down[i]
 
     # Implementa los movimientos restantes de manera similar
+    def move_L(self):
+        pass
 
+    def move_U(self):
+        pass
 
+    def move_D(self):
+        pass
+
+    def move_F(self):
+        pass
+
+    def move_B(self):
+        pass
+
+    # Movimientos en sentido antihorario, invocan 3 veces el movimiento original
+
+    def move_Ri(self):
+        for _ in range(3):
+            self.move_R()
+
+    def move_Li(self):
+        for _ in range(3):
+            self.move_L()
+
+    def move_Ui(self):
+        for _ in range(3):
+            self.move_U()
+
+    def move_Di(self):
+        for _ in range(3):
+            self.move_D()
+
+    def move_Fi(self):
+        for _ in range(3):
+            self.move_F()
+
+    def move_Bi(self):
+        for _ in range(3):
+            self.move_B()
+
+    def shuffle(self):
+        shuffle_n = random.randint(50, 200)
+        for _ in range(shuffle_n):
+            random_n = random.randint(0, 11)
+            self.__make_move(random_n)
+
+    def __make_move(self, move):
+        if move == 0:
+            self.move_R
+        elif move == 1:
+            self.move_L
+        elif move == 2:
+            self.move_U
+        elif move == 3:
+            self.move_D
+        elif move == 4:
+            self.move_F
+        elif move == 5:
+            self.move_B
+        elif move == 6:
+            self.move_Ri
+        elif move == 7:
+            self.move_Li
+        elif move == 8:
+            self.move_Ui
+        elif move == 9:
+            self.move_Di
+        elif move == 10:
+            self.move_Fi
+        elif move == 11:
+            self.move_Bi
 
 
 
