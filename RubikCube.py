@@ -1,3 +1,4 @@
+#Guineote & Adlerero
 import random
 
 class Cube:
@@ -118,6 +119,31 @@ class Cube:
             self.move_Bi
 
 
+    def Breadth_First_Search(self):
+        pass
+    
+    def Best_First_Search(self):
+        pass
+    
+    def A_Star(self):
+        pass
+    
+    def AdlereroGuineoSearch(self):
+        pass
+    
+    
+class Heuristics:
+    @staticmethod
+    def Heuristic1():
+        pass
+    
+    @staticmethod
+    def Heuristic2():
+        pass
+    
+    @staticmethod
+    def Heuristic3():
+        pass
 
 # Crea una instancia del cubo
 cube = Cube()
