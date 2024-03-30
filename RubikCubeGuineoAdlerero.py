@@ -1,6 +1,9 @@
 #Adlerero & Guineote inc.
 import random
 import os
+from collections import defaultdict
+from collections import deque
+
         # Inicializa la configuración del cubo de Rubik
         # Cada cara es una matriz de 3x3 con colores representados por números
         # Se representa el cubo con una matriz tridimensional de 3x3x6 logrando una representación de cada cara y del cubo en su totalidad
@@ -286,35 +289,6 @@ class GACube:
         # Si todas las caras se han verificado correctamente, se retorna True
         return True
 
-    def solve_bfs(self):
-        """
-        Solves the Rubik's Cube using Breadth-First Search (BFS) with a
-        maximum depth of 5 moves.
-        """
-        queue = [(self.cube.copy(), [])]  # Queue of (cube state, move sequence)
-        visited = set()  # Set to store visited states
-
-        while queue:
-            current_cube, move_sequence = queue.pop(0)
-
-            if self.is_solved():
-                print("Solved! Move sequence:", move_sequence)
-                return
-
-            # Generate all possible moves from the current state
-            for move in dir(self):
-                if move.startswith("move_") and move not in ("move_R", "move_Ri", "move_L", "move_Li",
-                                                             "move_U", "move_Ui", "move_D", "move_Di",
-                                                             "move_F", "move_Fi", "move_B", "move_Bi"):
-                    new_cube = current_cube.copy()
-                    getattr(self, move)()  # Apply the move
-
-                    # Check if the new state has not been visited before
-                    if str(new_cube) not in visited:
-                        visited.add(str(new_cube))
-                        queue.append((new_cube, move_sequence + [move]))
-
-        print("No solution found.")
 
     def screen(self):
         #Esta linea borra las secuencias de ejecucion, dejando la pantalla limpia para imprimir el menu
@@ -334,7 +308,11 @@ class GACube:
             print("\033[1;32m 7. Conocer Heuristicas\033[0m")
             print("\033[1;32m 8. Imprimir Cubo\033[0m")
             print("\033[1;31m 0. Salir\033[0m") #Imprime la opción de salir en color rojo
-            choice = int(input("\n\033[1mSeleccione una opción: \033[0m"))
+            choice = input("\n\033[1mSeleccione una opción: \033[0m")
+            while not choice.isdigit():
+                choice = input("\n\033[1mSeleccione una opción valida: \033[0m")
+            choice = int(choice)
+
             if choice > 9:
                 print("Invalido")
             elif choice < 0:
@@ -344,7 +322,7 @@ class GACube:
                 self.Best_First_Search()
             elif choice == 2:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Breadth-First-Search'\033[0m")
-                self.Breadth_First_Search()
+                self.solve_bfs()
             elif choice == 3:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante A*'\033[0m")
                 self.A_Star()
@@ -361,13 +339,13 @@ class GACube:
             elif choice == 7:
                 print("\n\033[1;36mSeleccionó la opción 'Conocer Heuristicas'\033[0m")
             elif choice == 8:
-                 print("\n\033[1;36mSeleccionó la opción 'Imprimir Cubo'\033[0m")
-                 self.print_cube()
+                print("\n\033[1;36mSeleccionó la opción 'Imprimir Cubo'\033[0m")
+                self.print_cube()
             elif choice == 0:
                 print("\n\033[1;31mSaliendo...\033[0m")
                 break
-    
-    
+        
+        
     
     
     
@@ -397,3 +375,6 @@ cube.solve_bfs()
 #Modifique la matriz para que pusiera los numeros
 #Modifique print para que imprimiera en vez de cara 0, cada U y asi
 #Implemente los 12 movimientos
+#Implemente make move como un menu para hacer los movimientos de manera mas intuitiva
+#Implemente shuffle para poder revolver el cubo de forma aleatoria
+#Implemente __make_move como una funcion auxiliar para makemove y shuffle
