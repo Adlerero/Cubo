@@ -157,6 +157,18 @@ class GACube:
             random_n = random.randint(0, 11)
             self.__make_move(random_n)
 
+    def make_move(self):
+        query = input("¿Cuantos movimientos desea realizar? ")
+        while not query.isdigit():
+            query = input("Escriba un numero valido: ")
+        num_moves = int(query)
+        print("\nMovimientos:\n0 = R | 1 = L | 2 = U | 3 = D | 4 = F | 5 = B | 6 = Ri | 7 = Li | 8 = Ui | 9 = Di | 10 = Fi | 11 = Bi")
+        for _ in range(num_moves):
+            move = input("\nEscriba el movimiento deseado: ")
+            while not move.isdigit():
+                    move = input("\nEscriba un numero valido: ")
+            self.__make_move(int(move))
+
     def __make_move(self, move):
         if move == 0:
             self.move_R()
@@ -182,6 +194,8 @@ class GACube:
             self.move_Fi()
         elif move == 11:
             self.move_Bi()
+        else:
+            print("\nMovimiento no valido")
 
 
     def Breadth_First_Search(self):
@@ -217,7 +231,66 @@ class GACube:
                 print(row)
             print()
     
-    
+    def is_solved(self):
+        """
+        Comprueba si el cubo está resuelto (cada cara tiene un número específico).
+
+        Args:
+            self: Instancia de la clase `GACube`.
+
+        Returns:
+            True si el cubo está resuelto, False en caso contrario.
+        """
+
+        # Recorremos cada una de las 6 caras del cubo
+        for i in range(6):
+
+            # Se toma el color del primer elemento de la cara como referencia
+            face_color = self.cube[i][0][0]
+
+            # Se verifica que todos los elementos de la cara tengan el mismo color que la referencia
+            for row in self.cube[i]:
+                for color in row:
+                    if color != face_color:
+                        return False
+
+            # Se comprueba que el número de la cara coincida con el valor de `i`
+            if face_color != i:
+                return False
+
+        # Si todas las caras se han verificado correctamente, se retorna True
+        return True
+
+    def solve_bfs(self):
+        """
+        Solves the Rubik's Cube using Breadth-First Search (BFS) with a
+        maximum depth of 5 moves.
+        """
+        queue = [(self.cube.copy(), [])]  # Queue of (cube state, move sequence)
+        visited = set()  # Set to store visited states
+
+        while queue:
+            current_cube, move_sequence = queue.pop(0)
+
+            if self.is_solved():
+                print("Solved! Move sequence:", move_sequence)
+                return
+
+            # Generate all possible moves from the current state
+            for move in dir(self):
+                if move.startswith("move_") and move not in ("move_R", "move_Ri", "move_L", "move_Li",
+                                                             "move_U", "move_Ui", "move_D", "move_Di",
+                                                             "move_F", "move_Fi", "move_B", "move_Bi"):
+                    new_cube = current_cube.copy()
+                    getattr(self, move)()  # Apply the move
+
+                    # Check if the new state has not been visited before
+                    if str(new_cube) not in visited:
+                        visited.add(str(new_cube))
+                        queue.append((new_cube, move_sequence + [move]))
+
+        print("No solution found.")
+
     
 class Heuristics:
     @staticmethod
@@ -248,12 +321,19 @@ class Heuristics:
 # Crea una instancia del cubo
 cube = GACube()
 cube.print_cube()
+cube.make_move()
+cube.print_cube()
+"""
 cube.move_R()
 cube.print_cube()
 cube.move_U()
 cube.print_cube()
 cube.move_R()
 cube.print_cube()
+print(cube.is_solved())
+
+cube.solve_bfs()
+"""
 
 #Updates Summary:
 #Se agregó la matriz tridimensional, la cual funciona
