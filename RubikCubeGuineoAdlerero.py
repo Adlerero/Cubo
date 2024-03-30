@@ -1,11 +1,36 @@
 #Adlerero & Guineote inc.
 import random
-
+import os
         # Inicializa la configuración del cubo de Rubik
         # Cada cara es una matriz de 3x3 con colores representados por números
         # Se representa el cubo con una matriz tridimensional de 3x3x6 logrando una representación de cada cara y del cubo en su totalidad
         #Lo mismo a expresar [[['1' for _ in range (3) ] for _ in range (3)] for _ in range (6)] pero con más modales
         #0 blanco, 1 rojo, 2 verde, 3 naranja, 4 azul y 5 amarillo.
+class GAHeuristics:
+    @staticmethod
+    def Heuristic1(cube):
+        #Heuristica prueba
+        '''proporciona una estimación de cuán lejos está el cubo de su estado objetivo. 
+            Cuanto menor sea el valor devuelto por la heurística, más cerca estará el cubo 
+            de estar completamente resuelto.'''
+        # Cuenta el número de aristas y centros que no están en su posición correcta
+        count = 0
+        for i in range(6):
+            for j in range(3):
+                for k in range(3):
+                    if cube[i][j][k] != (i + 1) % 6:
+                        count += 1
+        return count
+    
+    @staticmethod
+    def Heuristic2(cube):
+        pass
+    
+    @staticmethod
+    def Heuristic3(cube):
+        pass
+    
+
 class GACube:
     def __init__(self):
         self.cube = [[[i] * 3 for _ in range(3)] for i in range(6)]
@@ -291,38 +316,65 @@ class GACube:
 
         print("No solution found.")
 
+    def screen(self):
+        #Esta linea borra las secuencias de ejecucion, dejando la pantalla limpia para imprimir el menu
+        os.system('cls' if os.name == 'nt' else 'clear')
+        flag = True
+        #Se usan las secuencias de escape ANSI para cambiar el color de texto en consola
+        #Se usa color verde para las opciones posteriores
+        while flag:
+            print("\n\033[1;33m\t¡Bienvenido!\033[0m\n")
+            print("\033[1;34m============ Menú ============\033[0m")
+            print("\033[1;32m 1. Resolver mediante Best-First-Search\033[0m")
+            print("\033[1;32m 2. Resolver mediante Breadth-First-Search\033[0m")
+            print("\033[1;32m 3. Resolver mediante A*\033[0m")
+            print("\033[1;32m 4. Resolver mediante A* Bidireccional\033[0m")
+            print("\033[1;32m 5. Hacer shuffle\033[0m")
+            print("\033[1;32m 6. Hacer movimientos\033[0m")
+            print("\033[1;32m 7. Conocer Heuristicas\033[0m")
+            print("\033[1;32m 8. Imprimir Cubo\033[0m")
+            print("\033[1;31m 0. Salir\033[0m") #Imprime la opción de salir en color rojo
+            choice = int(input("\n\033[1mSeleccione una opción: \033[0m"))
+            if choice > 9:
+                print("Invalido")
+            elif choice < 0:
+                print("Innvalido") 
+            elif choice == 1:
+                print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Best-First-Search'\033[0m")
+                self.Best_First_Search()
+            elif choice == 2:
+                print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Breadth-First-Search'\033[0m")
+                self.Breadth_First_Search()
+            elif choice == 3:
+                print("\n\033[1;36mSeleccionó la opción 'Resolver mediante A*'\033[0m")
+                self.A_Star()
+            elif choice == 4:
+                print("\n\033[1;36mSeleccionó la opción 'Resolver mediante A* Bidireccional'\033[0m")
+                self.AdlereroGuineoSearch()
+            elif choice == 5:
+                print("\n\033[1;36mSeleccionó la opción 'Hacer Shuffle'\033[0m")
+                self.shuffle()
+            elif choice == 6:
+                print("\n\033[1;36mSeleccionó la opción 'Hacer movimientos'\033[0m")
+                self.make_move()
+                self.print_cube()
+            elif choice == 7:
+                print("\n\033[1;36mSeleccionó la opción 'Conocer Heuristicas'\033[0m")
+            elif choice == 8:
+                 print("\n\033[1;36mSeleccionó la opción 'Imprimir Cubo'\033[0m")
+                 self.print_cube()
+            elif choice == 0:
+                print("\n\033[1;31mSaliendo...\033[0m")
+                break
     
-class Heuristics:
-    @staticmethod
-    def Heuristic1(cube):
-        #Heuristica prueba
-        '''proporciona una estimación de cuán lejos está el cubo de su estado objetivo. 
-            Cuanto menor sea el valor devuelto por la heurística, más cerca estará el cubo 
-            de estar completamente resuelto.'''
-        # Cuenta el número de aristas y centros que no están en su posición correcta
-        count = 0
-        for i in range(6):
-            for j in range(3):
-                for k in range(3):
-                    if cube[i][j][k] != (i + 1) % 6:
-                        count += 1
-        return count
     
-    @staticmethod
-    def Heuristic2(cube):
-        pass
     
-    @staticmethod
-    def Heuristic3(cube):
-        pass
-
-
+    
+    
 
 # Crea una instancia del cubo
 cube = GACube()
-cube.print_cube()
-cube.make_move()
-cube.print_cube()
+cube.screen()
 """
 cube.move_R()
 cube.print_cube()
@@ -334,16 +386,11 @@ print(cube.is_solved())
 
 cube.solve_bfs()
 """
-
-#Updates Summary:
+#Updates Summary Guineo:
 #Se agregó la matriz tridimensional, la cual funciona
 #Se agregó el método print para mostrar la eficacia de la representación del cubo
-#Se adecuó el método move_R sin embargo, hay un error ya que o realiza la operación
 #Se agregó una heuristica de prueba
-
-#Notes:
-#Corregir método move_R para garantizar funcionalidad y adecuar a los demas movimientos.
-#Probar heuristica
+#Se implementó un Menu principal para moverse de manera más amigable como usuario dentro del programa
 
 
 #Updates Adlerero:
