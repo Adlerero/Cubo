@@ -1,7 +1,10 @@
 #Adlerero & Guineote inc.
 import random
 import os
+import copy
+from collections import defaultdict
 from collections import deque
+
         # Inicializa la configuración del cubo de Rubik
         # Cada cara es una matriz de 3x3 con colores representados por números
         # Se representa el cubo con una matriz tridimensional de 3x3x6 logrando una representación de cada cara y del cubo en su totalidad
@@ -182,6 +185,7 @@ class GACube:
         for _ in range(shuffle_n):
             random_n = random.randint(0, 11)
             self.__make_move(random_n)
+        print("Shuffle aleatorio realizado con éxito!")
 
     def make_move(self):
         query = input("¿Cuantos movimientos desea realizar? ")
@@ -224,32 +228,46 @@ class GACube:
             print("\nMovimiento no valido")
 
 
-    def Breadth_First_Search(self, #initial_state, final_state
-                             ):
+
+    def Breadth_First_Search(self):
+        initial_state = copy.deepcopy(self.cube)
+        final_state = [[[i] * 3 for _ in range(3)] for i in range(6)]  # Estado final del cubo
+
+        queue = deque([(initial_state, [])])  # Inicialización de la cola con el estado inicial y una lista vacía como camino
         visited = set()
-        Queue = deque ([(self.cube.copy(), [])])
-        
-        while Queue:
-            current_cube, move_sequence = Queue.popleft()
-            if self.is_solved:
-                print("Cubo resuelto, path: ", move_sequence)
-                return
-            
-            for move in dir(self):
-                if move.startswith("Move_") and move not in ("move_R", "move_Ri", "move_L", "move_Li",
-                                                             "move_U", "move_Ui", "move_D", "move_Di",
-                                                             "move_F", "move_Fi", "move_B", "move_Bi"):
-                    new_cube = current_cube.copy()
-                    getattr(self, move)()  # Aplicar el movimiento
 
-                    # Verificar si el nuevo estado no ha sido visitado antes
-                    if str(new_cube) not in visited:
-                        visited.add(str(new_cube))
-                        Queue.append((new_cube, move_sequence + [move]))
+        while queue:
+            current_cube, path = queue.popleft()  # Desempaqueta el estado del cubo y el camino
 
-        print("No se encontró solución")
+            if self.is_solved():
+                return path
+
+            visited.add(str(current_cube))
+
+            # Lista de movimientos válidos
+            valid_moves = ["move_R", "move_Ri", "move_L", "move_Li",
+                       "move_U", "move_Ui", "move_D", "move_Di",
+                       "move_F", "move_Fi", "move_B", "move_Bi"]
+
+            for move in valid_moves:
+                new_cube = copy.deepcopy(current_cube)  # Realiza una copia profunda del estado del cubo
+                getattr(self, move)()  # Aplica el movimiento al nuevo cubo
+
+                # Verifica si el nuevo estado no ha sido visitado antes
+                if str(new_cube) not in visited:
+                    visited.append(new_cube)
+                    queue.append((new_cube, path + [move]))  # Agrega el nuevo estado y su camino a la cola
+
+        #print("No se encontró solución")
+        return []
         
+
+    
+    def copy_rudimentary(self):
+        cube_solved = self.cube = [[[i] * 3 for _ in range(3)] for i in range(6)]
         
+        return cube_solved
+    
     def Best_First_Search(self):
         pass
     
@@ -281,16 +299,6 @@ class GACube:
             print()
     
     def is_solved(self):
-        """
-        Comprueba si el cubo está resuelto (cada cara tiene un número específico).
-
-        Args:
-            self: Instancia de la clase `GACube`.
-
-        Returns:
-            True si el cubo está resuelto, False en caso contrario.
-        """
-
         # Recorremos cada una de las 6 caras del cubo
         for i in range(6):
 
@@ -301,44 +309,17 @@ class GACube:
             for row in self.cube[i]:
                 for color in row:
                     if color != face_color:
+                        print("Cubo no resuelto")
                         return False
 
             # Se comprueba que el número de la cara coincida con el valor de `i`
             if face_color != i:
+                print("Cubo no resuelto")
                 return False
 
         # Si todas las caras se han verificado correctamente, se retorna True
+        print("Cubo resuelto")
         return True
-
-    def solve_bfs(self):
-        """
-        Solves the Rubik's Cube using Breadth-First Search (BFS) with a
-        maximum depth of 5 moves.
-        """
-        queue = [(self.cube.copy(), [])]  # Queue of (cube state, move sequence)
-        visited = set()  # Set to store visited states
-
-        while queue:
-            current_cube, move_sequence = queue.pop(0)
-
-            if self.is_solved():
-                print("Solved! Move sequence:", move_sequence)
-                return
-
-            # Generate all possible moves from the current state
-            for move in dir(self):
-                if move.startswith("move_") and move not in ("move_R", "move_Ri", "move_L", "move_Li",
-                                                             "move_U", "move_Ui", "move_D", "move_Di",
-                                                             "move_F", "move_Fi", "move_B", "move_Bi"):
-                    new_cube = current_cube.copy()
-                    getattr(self, move)()  # Apply the move
-
-                    # Check if the new state has not been visited before
-                    if str(new_cube) not in visited:
-                        visited.add(str(new_cube))
-                        queue.append((new_cube, move_sequence + [move]))
-
-        print("No solution found.")
 
     def screen(self):
         #Esta linea borra las secuencias de ejecucion, dejando la pantalla limpia para imprimir el menu
@@ -357,8 +338,13 @@ class GACube:
             print("\033[1;32m 6. Hacer movimientos\033[0m")
             print("\033[1;32m 7. Conocer Heuristicas\033[0m")
             print("\033[1;32m 8. Imprimir Cubo\033[0m")
+            print("\033[1;32m 9. Estado del cubo\033[0m")
             print("\033[1;31m 0. Salir\033[0m") #Imprime la opción de salir en color rojo
-            choice = int(input("\n\033[1mSeleccione una opción: \033[0m"))
+            choice = input("\n\033[1mSeleccione una opción: \033[0m")
+            while not choice.isdigit():
+                choice = input("\n\033[1mSeleccione una opción valida: \033[0m")
+            choice = int(choice)
+
             if choice > 9:
                 print("Invalido")
             elif choice < 0:
@@ -369,6 +355,10 @@ class GACube:
             elif choice == 2:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Breadth-First-Search'\033[0m")
                 self.Breadth_First_Search()
+                if self.Breadth_First_Search():
+                    print("Path encontrado hasta solución: ", self.Breadth_First_Search())
+                else:
+                    print("No se encontró solución")
             elif choice == 3:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante A*'\033[0m")
                 self.A_Star()
@@ -385,13 +375,16 @@ class GACube:
             elif choice == 7:
                 print("\n\033[1;36mSeleccionó la opción 'Conocer Heuristicas'\033[0m")
             elif choice == 8:
-                 print("\n\033[1;36mSeleccionó la opción 'Imprimir Cubo'\033[0m")
-                 self.print_cube()
+                print("\n\033[1;36mSeleccionó la opción 'Imprimir Cubo'\033[0m")
+                self.print_cube()
+            elif choice == 9:
+                print("\n\033[1;36mSeleccionó la opción 'Estado del Cubo'\033[0m")
+                self.is_solved()
             elif choice == 0:
                 print("\n\033[1;31mSaliendo...\033[0m")
                 break
-    
-    
+        
+        
     
     
     
@@ -399,6 +392,7 @@ class GACube:
 # Crea una instancia del cubo
 cube = GACube()
 cube.screen()
+
 """
 cube.move_R()
 cube.print_cube()
@@ -421,3 +415,6 @@ cube.solve_bfs()
 #Modifique la matriz para que pusiera los numeros
 #Modifique print para que imprimiera en vez de cara 0, cada U y asi
 #Implemente los 12 movimientos
+#Implemente make move como un menu para hacer los movimientos de manera mas intuitiva
+#Implemente shuffle para poder revolver el cubo de forma aleatoria
+#Implemente __make_move como una funcion auxiliar para makemove y shuffle
