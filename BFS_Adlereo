@@ -410,6 +410,8 @@ cube.solve_bfs()
 #Se agregó el método print para mostrar la eficacia de la representación del cubo
 #Se agregó una heuristica de prueba
 #Se implementó un Menu principal para moverse de manera más amigable como usuario dentro del programa
+#Se optimizó el método is_solved y pequeñas correciones en el menú
+#Se mejoró el método breadt
 
 
 #Updates Adlerero:
