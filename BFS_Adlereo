@@ -2,6 +2,7 @@
 import random
 import os
 import copy
+import queue
 from collections import defaultdict
 from collections import deque
 
@@ -38,6 +39,7 @@ class GAHeuristics:
 class GACube:
     def __init__(self):
         self.cube = [[[i] * 3 for _ in range(3)] for i in range(6)]
+        self.cube_solved = copy.deepcopy(self.cube)
         
     #Cada movimiento es en sentido horario, a la derecha. Si se quiere mover a la izquierda, se invoca 3 veces el movimiento.
     def rotate_clockwise(self, face):
@@ -231,20 +233,24 @@ class GACube:
 
     def Breadth_First_Search(self):
         initial_state = copy.deepcopy(self.cube)
-        final_state = [[[i] * 3 for _ in range(3)] for i in range(6)]  # Estado final del cubo
-
+        final_state = copy.deepcopy(self.cube_solved)# Estado final del cubo
+        
+        graph = defaultdict(list)
+        #Agregar initial_state al grafo
+        graph[str(initial_state)] = []
+        
         queue = deque([(initial_state, [])])  # Inicialización de la cola con el estado inicial y una lista vacía como camino
         visited = set()
 
         while queue:
             current_cube, path = queue.popleft()  # Desempaqueta el estado del cubo y el camino
-
-            if self.is_solved():
+            visited.add(str(current_cube))
+            
+            if current_cube == final_state:
                 return path
 
-            visited.add(str(current_cube))
 
-            # Lista de movimientos válidos
+            #movimientos válidos
             valid_moves = ["move_R", "move_Ri", "move_L", "move_Li",
                        "move_U", "move_Ui", "move_D", "move_Di",
                        "move_F", "move_Fi", "move_B", "move_Bi"]
@@ -255,18 +261,12 @@ class GACube:
 
                 # Verifica si el nuevo estado no ha sido visitado antes
                 if str(new_cube) not in visited:
-                    visited.append(new_cube)
-                    queue.append((new_cube, path + [move]))  # Agrega el nuevo estado y su camino a la cola
-
-        #print("No se encontró solución")
-        return []
+                    graph[str(current_cube)].append(str(new_cube))
+                    graph[str(new_cube)].append(str(current_cube))
+                    queue.append((new_cube, path + [move]))
+                    
+        return graph
         
-
-    
-    def copy_rudimentary(self):
-        cube_solved = self.cube = [[[i] * 3 for _ in range(3)] for i in range(6)]
-        
-        return cube_solved
     
     def Best_First_Search(self):
         pass
@@ -298,15 +298,15 @@ class GACube:
                 print(row)
             print()
     
-    def is_solved(self):
+    def is_solved(self, cube):
         # Recorremos cada una de las 6 caras del cubo
         for i in range(6):
 
             # Se toma el color del primer elemento de la cara como referencia
-            face_color = self.cube[i][0][0]
+            face_color = cube[i][0][0]
 
             # Se verifica que todos los elementos de la cara tengan el mismo color que la referencia
-            for row in self.cube[i]:
+            for row in cube[i]:
                 for color in row:
                     if color != face_color:
                         print("Cubo no resuelto")
@@ -321,7 +321,7 @@ class GACube:
         print("Cubo resuelto")
         return True
 
-    def screen(self):
+    def menu_screen(self):
         #Esta linea borra las secuencias de ejecucion, dejando la pantalla limpia para imprimir el menu
         os.system('cls' if os.name == 'nt' else 'clear')
         flag = True
@@ -354,10 +354,11 @@ class GACube:
                 self.Best_First_Search()
             elif choice == 2:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Breadth-First-Search'\033[0m")
-                self.Breadth_First_Search()
-                if self.Breadth_First_Search():
-                    print("Path encontrado hasta solución: ", self.Breadth_First_Search())
+                result = self.Breadth_First_Search()
+                if result:
+                    print("Path encontrado hasta solución: ", result)
                 else:
+                    print(self.is_solved(self.cube))
                     print("No se encontró solución")
             elif choice == 3:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante A*'\033[0m")
@@ -379,7 +380,7 @@ class GACube:
                 self.print_cube()
             elif choice == 9:
                 print("\n\033[1;36mSeleccionó la opción 'Estado del Cubo'\033[0m")
-                self.is_solved()
+                print(self.is_solved(self.cube))
             elif choice == 0:
                 print("\n\033[1;31mSaliendo...\033[0m")
                 break
@@ -391,7 +392,7 @@ class GACube:
 
 # Crea una instancia del cubo
 cube = GACube()
-cube.screen()
+cube.menu_screen()
 
 """
 cube.move_R()
