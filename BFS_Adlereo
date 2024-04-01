@@ -1,4 +1,4 @@
-#Adlerero & Guineote inc.
+ #Adlerero & Guineote inc.
 import random
 import os
 import copy
@@ -231,41 +231,34 @@ class GACube:
 
 
 
-    def Breadth_First_Search(self):
-        initial_state = copy.deepcopy(self.cube)
-        final_state = copy.deepcopy(self.cube_solved)# Estado final del cubo
-        
-        graph = defaultdict(list)
-        #Agregar initial_state al grafo
-        graph[str(initial_state)] = []
-        
-        queue = deque([(initial_state, [])])  # Inicialización de la cola con el estado inicial y una lista vacía como camino
+    def Breadth_First_Search(self):        
+        queue = deque([(copy.deepcopy(self.cube), [])])  # Inicialización de la cola con el estado inicial y una lista vacía como camino
         visited = set()
 
         while queue:
             current_cube, path = queue.popleft()  # Desempaqueta el estado del cubo y el camino
-            visited.add(str(current_cube))
+            #visited.add(str(current_cube))
+            cube_str = str(current_cube)
             
-            if current_cube == final_state:
+            if current_cube == self.cube_solved:
+                self.cube = current_cube
                 return path
 
+            if cube_str in visited:
+                continue
+            visited.add(cube_str)
 
             #movimientos válidos
-            valid_moves = ["move_R", "move_Ri", "move_L", "move_Li",
-                       "move_U", "move_Ui", "move_D", "move_Di",
-                       "move_F", "move_Fi", "move_B", "move_Bi"]
+            valid_moves =   ["move_R", "move_Ri", "move_L", "move_Li",
+                            "move_U", "move_Ui", "move_D", "move_Di",
+                            "move_F", "move_Fi", "move_B", "move_Bi"]
 
             for move in valid_moves:
-                new_cube = copy.deepcopy(current_cube)  # Realiza una copia profunda del estado del cubo
+                self.cube = copy.deepcopy(current_cube)
                 getattr(self, move)()  # Aplica el movimiento al nuevo cubo
-
-                # Verifica si el nuevo estado no ha sido visitado antes
-                if str(new_cube) not in visited:
-                    graph[str(current_cube)].append(str(new_cube))
-                    graph[str(new_cube)].append(str(current_cube))
-                    queue.append((new_cube, path + [move]))
+                queue.append((copy.deepcopy(self.cube), path + [move]))
                     
-        return graph
+        return None
         
     
     def Best_First_Search(self):
