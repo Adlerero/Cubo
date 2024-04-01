@@ -1,4 +1,4 @@
- #Adlerero & Guineote inc.
+#Adlerero & Guineote inc.
 import random
 import os
 import copy
@@ -237,7 +237,6 @@ class GACube:
 
         while queue:
             current_cube, path = queue.popleft()  # Desempaqueta el estado del cubo y el camino
-            #visited.add(str(current_cube))
             cube_str = str(current_cube)
             
             if current_cube == self.cube_solved:
@@ -404,7 +403,7 @@ cube.solve_bfs()
 #Se agregó una heuristica de prueba
 #Se implementó un Menu principal para moverse de manera más amigable como usuario dentro del programa
 #Se optimizó el método is_solved y pequeñas correciones en el menú
-#Se mejoró el método breadt
+#Hice el método breadt Fisrt Search
 
 
 #Updates Adlerero:
