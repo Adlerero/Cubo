@@ -403,7 +403,7 @@ cube.solve_bfs()
 #Se agregó una heuristica de prueba
 #Se implementó un Menu principal para moverse de manera más amigable como usuario dentro del programa
 #Se optimizó el método is_solved y pequeñas correciones en el menú
-#Hice el método breadt Fisrt Search
+#Realicé el método breadt first search
 
 
 #Updates Adlerero:
