@@ -2,8 +2,6 @@
 import random
 import os
 import copy
-import queue
-from collections import defaultdict
 from collections import deque
 from queue import PriorityQueue
 
@@ -46,17 +44,24 @@ class NodeB:
     def calculate_heuristic(self, heuristic):
         self.heuristics_value = heuristic(self.cube)
 
+
     def __lt__(self, other):
         if not isinstance(other, NodeB):
             return False
-        return self.heuristics_value < other.heuristics_value
+        
+        if self.heuristics_value != other.heuristics_value:
+            return self.heuristics_value < other.heuristics_value
+        
+        return self.cube < other.cube
     
     def __gt__(self, other):
         if not isinstance(other, NodeB):
             return False
-        return self.heuristics_value > other.heuristics_value
+        
+        if self.heuristics_value != other.heuristics_value:
+            return self.heuristics_value > other.heuristics_value
 
-
+        return self.cube > other.cube
 
 class GACube:
     def __init__(self):
