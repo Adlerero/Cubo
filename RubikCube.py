@@ -12,37 +12,89 @@ from queue import PriorityQueue
         #0 blanco, 1 rojo, 2 verde, 3 naranja, 4 azul y 5 amarillo.
 class GAHeuristics:
     @staticmethod
-    def Heuristic1(cube):
-        #Heuristica prueba
-        '''proporciona una estimación de cuán lejos está el cubo de su estado objetivo. 
-            Cuanto menor sea el valor devuelto por la heurística, más cerca estará el cubo 
-            de estar completamente resuelto.'''
-        # Cuenta el número de aristas y centros que no están en su posición correcta
-        count = 0
-        for i in range(6):
-            for j in range(3):
-                for k in range(3):
-                    if cube[i][j][k] != (i + 1) % 6:
-                        count += 1
-        return count
-    
+    def corners_edges_heuristic(cube):
+        # Calcula la cantidad mínima de movimientos necesarios para solucionar todas las esquinas
+        # y todas las aristas de manera independiente
+        corners_moves = GAHeuristics.count_corners_out_of_place(cube)
+        edges_moves = GAHeuristics.count_edges_out_of_place(cube)
+        return max(corners_moves, edges_moves)
+
     @staticmethod
-    def Heuristic2(cube):
-        return 1
-    
+    def count_corners_out_of_place(cube):
+        # Posiciones objetivo de las esquinas en el cubo resuelto
+        target_corners = [
+            [[0, 0, 0], [0, 0, 2], [0, 2, 0]],
+            [[0, 0, 2], [0, 2, 2], [0, 2, 0]],
+            [[0, 2, 2], [0, 2, 0], [0, 2, 2]],
+            [[0, 2, 0], [0, 0, 0], [0, 0, 2]],
+            [[2, 0, 0], [2, 0, 2], [2, 2, 0]],
+            [[2, 0, 2], [2, 2, 2], [2, 2, 0]],
+            [[2, 2, 2], [2, 2, 0], [2, 2, 2]],
+            [[2, 2, 0], [2, 0, 0], [2, 0, 2]]
+        ]
+
+        # Contador de esquinas fuera de lugar
+        out_of_place = 0
+
+        # Comparamos cada esquina en el cubo actual con su posición objetivo
+        for target_corner in target_corners:
+            if target_corner not in cube:
+                out_of_place += 1
+
+        return out_of_place
+
     @staticmethod
-    def Heuristic3(cube):
-        pass
+    def count_edges_out_of_place(cube):
+        # Posiciones objetivo de las aristas en el cubo resuelto
+        target_edges = [
+            [[0, 0, 1], [0, 1, 0]],
+            [[0, 0, 1], [0, 1, 2]],
+            [[0, 2, 1], [0, 1, 0]],
+            [[0, 2, 1], [0, 1, 2]],
+            [[1, 0, 0], [0, 1, 0]],
+            [[1, 0, 2], [0, 1, 0]],
+            [[1, 2, 0], [0, 1, 2]],
+            [[1, 2, 2], [0, 1, 2]],
+            [[2, 0, 1], [0, 1, 0]],
+            [[2, 0, 1], [0, 1, 2]],
+            [[2, 2, 1], [0, 1, 0]],
+            [[2, 2, 1], [0, 1, 2]],
+            [[1, 0, 0], [2, 1, 0]],
+            [[1, 0, 2], [2, 1, 0]],
+            [[1, 2, 0], [2, 1, 2]],
+            [[1, 2, 2], [2, 1, 2]],
+            [[0, 1, 0], [1, 0, 0]],
+            [[0, 1, 0], [1, 2, 0]],
+            [[0, 1, 2], [1, 0, 2]],
+            [[0, 1, 2], [1, 2, 2]],
+            [[2, 1, 0], [1, 0, 0]],
+            [[2, 1, 0], [1, 2, 0]],
+            [[2, 1, 2], [1, 0, 2]],
+            [[2, 1, 2], [1, 2, 2]],
+        ]
+
+        # Contador de aristas fuera de lugar
+        out_of_place = 0
+
+        # Comparamos cada arista en el cubo actual con su posición objetivo
+        for target_edge in target_edges:
+            if target_edge not in cube:
+                out_of_place += 1
+
+        return out_of_place
 
 
 class NodeB:
-    def __init__(self, cube):
+    def __init__(self, cube, path = None):
+        if path is None:
+            path = []
         self.cube = cube
-        self.heuristics_value = -1
-        self.path = []
+        self.cube_solved = [[[i] * 3 for _ in range(3)] for i in range(6)]
+        self.heuristics_value = float('inf')  # Asegura un valor inicial alto
+        self.path = path
 
     def calculate_heuristic(self, heuristic):
-        self.heuristics_value = heuristic(self.cube)
+        self.heuristics_value = heuristic(self.cube) #self.cube_solved)
 
 
     def __lt__(self, other):
@@ -53,7 +105,6 @@ class NodeB:
             return self.heuristics_value < other.heuristics_value
         
         return self.cube < other.cube
-    
     def __gt__(self, other):
         if not isinstance(other, NodeB):
             return False
@@ -62,7 +113,7 @@ class NodeB:
             return self.heuristics_value > other.heuristics_value
 
         return self.cube > other.cube
-
+        
 class GACube:
     def __init__(self):
         self.cube = [[[i] * 3 for _ in range(3)] for i in range(6)]
@@ -318,20 +369,19 @@ class GACube:
                 continue
             visited.add(cube_str)
 
-            valid_moves =   ["move_R", "move_Ri", "move_L", "move_Li",
-                            "move_U", "move_Ui", "move_D", "move_Di",
-                            "move_F", "move_Fi", "move_B", "move_Bi"]   
+            valid_moves = ["move_R", "move_Ri", "move_L", "move_Li",
+                           "move_U", "move_Ui", "move_D", "move_Di",
+                           "move_F", "move_Fi", "move_B", "move_Bi"]
 
             for move in valid_moves:
                 self.cube = copy.deepcopy(current_node.cube)
                 getattr(self, move)()
-                new_node = NodeB(self.cube)
-                new_node.calculate_heuristic(heuristic)
-                new_node.path = current_node.path + [move]
-                pq.put(new_node)
+                new_cube_str = str(self.cube)
+                if new_cube_str not in visited:
+                    new_node = NodeB(copy.deepcopy(self.cube), current_node.path + [move])
+                    pq.put(new_node)
 
         return None
-
 
     def A_Star(self):
         pass
@@ -413,9 +463,15 @@ class GACube:
             if choice > 10:
                 print("Invalido")
             elif choice < 0:
-                print("Innvalido") 
+                print("Invalido") 
             elif choice == 1:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Best-First-Search'\033[0m")
+                result = self.Best_First_Search(GAHeuristics.corners_edges_heuristic)
+                if result:
+                    print("Path encontrado hasta solución: ", result)
+                else:
+                    print("No se encontró solución o el cubo ya está resuelto.")
+                '''
                 query = input("\n¿Que heurística desea usar? Escriba 1, 2 o 3. ")
                 while not query.isdigit():
                     query = input("\nEscriba un número válido. ")
@@ -423,27 +479,27 @@ class GACube:
                 if query < 1 and query > 3:
                     print("\nError. Heuristica no existente.")
                 elif query == 1:
-                    result = self.Best_First_Search(GAHeuristics.Heuristic1)
+                    result = self.Best_First_Search(GAHeuristics.corner_edge_heuristic)
                     if result:
                         print("Path encontrado hasta solución: ", result)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
                 elif query == 2:
-                    result = self.Best_First_Search(GAHeuristics.Heuristic2)
+                    result = self.Best_First_Search(GAHeuristics.count_corners_out_of_place)
                     if result:
                         print("Path encontrado hasta solución: ", result)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
                 else:
-                    result = self.Best_First_Search(GAHeuristics.Heuristic3)
+                    result = self.Best_First_Search(GAHeuristics.count_edges_out_of_place)
                     if result:
                         print("Path encontrado hasta solución: ", result)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
-
+            '''
             elif choice == 2:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Breadth-First-Search'\033[0m")
                 result = self.Breadth_First_Search()
@@ -486,24 +542,5 @@ class GACube:
 
 
 
-
-# Crea una instancia del cubo
 cube = GACube()
 cube.menu_screen()
-
-#Updates Summary Guineo:
-#Se agregó la matriz tridimensional, la cual funciona
-#Se agregó el método print para mostrar la eficacia de la representación del cubo
-#Se agregó una heuristica de prueba
-#Se implementó un Menu principal para moverse de manera más amigable como usuario dentro del programa
-#Se optimizó el método is_solved y pequeñas correciones en el menú
-#Realicé el método breadt first search
-
-
-#Updates Adlerero:
-#Modifique la matriz para que pusiera los numeros
-#Modifique print para que imprimiera en vez de cara 0, cada U y asi
-#Implemente los 12 movimientos
-#Implemente make move como un menu para hacer los movimientos de manera mas intuitiva
-#Implemente shuffle para poder revolver el cubo de forma aleatoria
-#Implemente __make_move como una funcion auxiliar para makemove y shuffle
