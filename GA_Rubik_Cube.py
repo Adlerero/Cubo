@@ -4,6 +4,7 @@ import os
 import copy
 from collections import deque
 from queue import PriorityQueue
+import time
 
         # Inicializa la configuración del cubo de Rubik
         # Cada cara es una matriz de 3x3 con colores representados por números
@@ -19,10 +20,12 @@ class GAHeuristics:
             de estar completamente resuelto.'''
         # Cuenta el número de aristas y centros que no están en su posición correcta
         count = 0
-        for i in range(6):
-            for j in range(3):
-                for k in range(3):
-                    if cube[i][j][k] != (i + 1) % 6:
+        # Asumiendo que cada cara del cubo debe tener un color único, definido por la primera pieza de esa cara
+        for i in range(6):  # 6 caras
+            face_color = cube[i][0][0]  # Color objetivo para esta cara
+            for j in range(3):  # Cada fila en una cara
+                for k in range(3):  # Cada columna en una fila
+                    if cube[i][j][k] != face_color:
                         count += 1
         return count
     
@@ -32,8 +35,77 @@ class GAHeuristics:
         return len(path)
     
     @staticmethod
-    def Heuristic3(cube):
-        return 1
+    def corners_edges_heuristic(cube):
+        # Calcula la cantidad mínima de movimientos necesarios para solucionar todas las esquinas
+        # y todas las aristas de manera independiente
+        corners_moves = GAHeuristics.count_corners_out_of_place(cube)
+        edges_moves = GAHeuristics.count_edges_out_of_place(cube)
+        print("jeje")
+        return max(corners_moves, edges_moves)
+
+    @staticmethod
+    def count_corners_out_of_place(cube):
+        # Posiciones objetivo de las esquinas en el cubo resuelto
+        target_corners = [
+            [[0, 0, 0], [0, 0, 2], [0, 2, 0]],
+            [[0, 0, 2], [0, 2, 2], [0, 2, 0]],
+            [[0, 2, 2], [0, 2, 0], [0, 2, 2]],
+            [[0, 2, 0], [0, 0, 0], [0, 0, 2]],
+            [[2, 0, 0], [2, 0, 2], [2, 2, 0]],
+            [[2, 0, 2], [2, 2, 2], [2, 2, 0]],
+            [[2, 2, 2], [2, 2, 0], [2, 2, 2]],
+            [[2, 2, 0], [2, 0, 0], [2, 0, 2]]
+        ]
+
+        # Contador de esquinas fuera de lugar
+        out_of_place = 0
+
+        # Comparamos cada esquina en el cubo actual con su posición objetivo
+        for target_corner in target_corners:
+            if target_corner not in cube:
+                out_of_place += 1
+
+        return out_of_place
+
+    @staticmethod
+    def count_edges_out_of_place(cube):
+        # Posiciones objetivo de las aristas en el cubo resuelto
+        target_edges = [
+            [[0, 0, 1], [0, 1, 0]],
+            [[0, 0, 1], [0, 1, 2]],
+            [[0, 2, 1], [0, 1, 0]],
+            [[0, 2, 1], [0, 1, 2]],
+            [[1, 0, 0], [0, 1, 0]],
+            [[1, 0, 2], [0, 1, 0]],
+            [[1, 2, 0], [0, 1, 2]],
+            [[1, 2, 2], [0, 1, 2]],
+            [[2, 0, 1], [0, 1, 0]],
+            [[2, 0, 1], [0, 1, 2]],
+            [[2, 2, 1], [0, 1, 0]],
+            [[2, 2, 1], [0, 1, 2]],
+            [[1, 0, 0], [2, 1, 0]],
+            [[1, 0, 2], [2, 1, 0]],
+            [[1, 2, 0], [2, 1, 2]],
+            [[1, 2, 2], [2, 1, 2]],
+            [[0, 1, 0], [1, 0, 0]],
+            [[0, 1, 0], [1, 2, 0]],
+            [[0, 1, 2], [1, 0, 2]],
+            [[0, 1, 2], [1, 2, 2]],
+            [[2, 1, 0], [1, 0, 0]],
+            [[2, 1, 0], [1, 2, 0]],
+            [[2, 1, 2], [1, 0, 2]],
+            [[2, 1, 2], [1, 2, 2]],
+        ]
+
+        # Contador de aristas fuera de lugar
+        out_of_place = 0
+
+        # Comparamos cada arista en el cubo actual con su posición objetivo
+        for target_edge in target_edges:
+            if target_edge not in cube:
+                out_of_place += 1
+
+        return out_of_place
 
 
 class NodeB:
@@ -85,7 +157,11 @@ class GACube:
         self.cube = [[[i] * 3 for _ in range(3)] for i in range(6)]
         self.cube_solved = copy.deepcopy(self.cube)
         #self.cube_solved = self.cube_to_tuple(self.cube_solved)
-
+    
+    
+    def show_time(self, mili):
+        minutes, seg = divmod(mili // 1000, 60)
+        return '{:02d}:{:02d}.{:03d}'.format(minutes, seg, mili % 1000)
         
     #Cada movimiento es en sentido horario, a la derecha. Si se quiere mover a la izquierda, se invoca 3 veces el movimiento.
     def rotate_clockwise(self, face):
@@ -239,9 +315,9 @@ class GACube:
     #Realiza n movimientos aleatorios
     def scramble(self, n_movements):
         if n_movements <= 0:
-            print("\nNúmero de movimientos menor a 0.")
+            print("\nMovimiento inválidor")
             return
-        print("Scramble realizado con exito: \n")
+        print("Scramble realizado con exito.\nMovimietos realizados:")
         for _ in range(n_movements):
             move = random.randint(0, 11)
             self.__make_move(move)
@@ -315,7 +391,7 @@ class GACube:
 
 
 
-    def Breadth_First_Search(self):        
+    def Breadth_First_Search(self):       
         queue = deque([(copy.deepcopy(self.cube), [])])  # Inicialización de la cola con el estado inicial y una lista vacía como camino
         visited = set()
 
@@ -340,7 +416,7 @@ class GACube:
                 self.cube = copy.deepcopy(current_cube)
                 getattr(self, move)()  # Aplica el movimiento al nuevo cubo
                 queue.append((copy.deepcopy(self.cube), path + [move]))
-                    
+                  
         return None
         
     def cube_to_tuple(self, cube):
@@ -355,19 +431,16 @@ class GACube:
 
         while pq:
             curr_cube = pq.get()
-            cube_str = str(curr_cube.cube)
             if curr_cube.cube == self.cube_solved:
                 self.cube = curr_cube.cube
                 return True, curr_cube.path
-            #if len(curr_cube.path) > 1:
-             #   continue
 
-            print()
+            #print()
             #print(cube_str)
             #print(pq.qsize())
             #print(len(visited))
-            print(len(curr_cube.path))
-            print("-------")
+            #print(len(curr_cube.path))
+            #print("-------")
             #if cube_str in visited:
             #    continue
             visited.add(tuple(self.cube_to_tuple(curr_cube.cube)))
@@ -377,11 +450,10 @@ class GACube:
                 temp.cube = copy.deepcopy(curr_cube.cube)
                 getattr(temp, move)()
                 neighbor = NodeB(copy.deepcopy(temp.cube))
-                neighbor_str = str(neighbor.cube)
                 neighbor.path = copy.deepcopy(curr_cube.path) + [move]
                 neighbor.calculate_heuristic(heuristic)
                 # comprueba si si crear nuevo arreglo
-                print(len(neighbor.path), "-", neighbor.heuristics_value, end=" ")
+                #print(len(neighbor.path), "-", neighbor.heuristics_value, end=" ")
                 if self.cube_to_tuple(neighbor.cube) not in visited:
                     pq.put(copy.deepcopy(neighbor))
                     visited.add(self.cube_to_tuple(neighbor.cube))
@@ -420,8 +492,61 @@ class GACube:
         return False
 
     
-    def AdlereroGuineoSearch(self):
-        pass
+    def AdlereroGuineoSearch(self, heuristic):
+        #A* Bidirectional
+        ForwardVisited = set()  #En este conjunto se guardan los estados visitados en la busqueda hacia adelante 
+        BackwardVisited = set() #En este se guardan los estados visitados en la busqueda hacia atras
+        start_node = NodeAStar(copy.deepcopy(self.cube))
+        goal_node = NodeAStar(copy.deepcopy(self.cube_solved))
+        source_queue = PriorityQueue()
+        final_queue = PriorityQueue()
+        source_queue.put((start_node))
+        final_queue.put((goal_node))
+        valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]  
+        
+        while not source_queue.empty():
+            #forward
+            steph_curry_node = source_queue.get()
+            if steph_curry_node.cube == self.cube_solved:
+                self.cube = steph_curry_node.cube
+                return True, steph_curry_node.path
+            
+            ForwardVisited.add(self.cube_to_tuple(steph_curry_node.cube))
+            
+            for move in valid_moves:
+                temp_cube = GACube()
+                temp_cube.cube = copy.deepcopy(steph_curry_node.cube)
+                getattr(temp_cube, move)()
+                friendlyNeighbor = NodeAStar(copy.deepcopy(temp_cube.cube), distance=steph_curry_node.distance + 1)
+                friendlyNeighbor.path = copy.deepcopy(steph_curry_node.path) + [move]
+                friendlyNeighbor.calculate_heuristic(heuristic)
+                
+                if self.cube_to_tuple(friendlyNeighbor.cube) not in ForwardVisited:
+                    source_queue.put((friendlyNeighbor))
+                    ForwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
+        while not final_queue.empty():
+            #backward 
+            purdy_node = final_queue.get()
+            if purdy_node.cube == self.cube:
+                self.cube = purdy_node.cube
+                return True, purdy_node.path
+            
+            BackwardVisited.add(self.cube_to_tuple(purdy_node.cube))
+            
+            for move in valid_moves:
+                temp_cube = GACube()
+                temp_cube.cube = copy.deepcopy(purdy_node.cube)
+                getattr(temp_cube, move)()
+                friendlyNeighbor = NodeAStar(copy.deepcopy(temp_cube.cube), distance=purdy_node.distance + 1)
+                friendlyNeighbor.path = copy.deepcopy(purdy_node.path) + [move]
+                friendlyNeighbor.calculate_heuristic(heuristic)
+                
+                if self.cube_to_tuple(friendlyNeighbor.cube) not in BackwardVisited:
+                    final_queue.put((friendlyNeighbor))
+                    BackwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
+                    
+        return False, None
+      
     
     def print_cube(self):
         #Se usa la funcion enumerate para regresar el indice y el elemento en cada iteracion
@@ -507,32 +632,53 @@ class GACube:
                 if query < 1 and query > 3:
                     print("\nError. Heuristica no existente.")
                 elif query == 1:
+                    starTime = time.time_ns()
                     result = self.Best_First_Search(GAHeuristics.Heuristic1)
+                    end = time.time_ns()
                     if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
                         print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
+                        
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
                 elif query == 2:
+                    starTime = time.time_ns()
                     result = self.Best_First_Search(GAHeuristics.Heuristic2)
+                    end = time.time_ns()
                     if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
                         print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
                 else:
-                    result = self.Best_First_Search(GAHeuristics.Heuristic3)
+                    starTime = time.time_ns()
+                    result = self.Best_First_Search(GAHeuristics.corners_edges_heuristic)
+                    end = time.time_ns()
                     if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
                         print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
 
             elif choice == 2:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Breadth-First-Search'\033[0m")
+                starTime = time.time_ns()
                 result = self.Breadth_First_Search()
+                end = time.time_ns()
                 if result:
+                    timeofop = (end - starTime) // 1_000_000
+                    final_time = self.show_time(timeofop) 
                     print("Path encontrado hasta solución: ", result)
+                    print("Tiempo de resolución: ", final_time)
                 else:
                     print(self.is_solved(self.cube))
                     print("No se encontró solución")
@@ -545,30 +691,86 @@ class GACube:
                 if query < 1 and query > 3:
                     print("\nError. Heuristica no existente.")
                 elif query == 1:
+                    starTime = time.time_ns()
                     result = self.A_Star(GAHeuristics.Heuristic1)
+                    end = time.time_ns()
                     if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
                         print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
                 elif query == 2:
+                    starTime = time.time_ns()
                     result = self.A_Star(GAHeuristics.Heuristic2)
+                    end = time.time_ns()
                     if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
                         print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
                 else:
-                    result = self.A_Star(GAHeuristics.Heuristic3)
+                    starTime = time.time_ns()
+                    result = self.A_Star(GAHeuristics.corners_edges_heuristic)
+                    end = time.time_ns()
                     if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
                         print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
                     else:
                         print(self.is_solved(self.cube))
                         print("No se encontró solución")
 
             elif choice == 4:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante A* Bidireccional'\033[0m")
-                self.AdlereroGuineoSearch()
+                query = input("\n¿Que heurística desea usar? Escriba 1, 2 o 3. ")
+                while not query.isdigit():
+                    query = input("\nEscriba un número válido. ")
+                query = int(query)
+                if query < 1 and query > 3:
+                    print("\nError. Heuristica no existente.")
+                elif query == 1:
+                    starTime = time.time_ns()
+                    result = self.AdlereroGuineoSearch(GAHeuristics.Heuristic1)
+                    end = time.time_ns()
+                    if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
+                        print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
+                    else:
+                        print(self.is_solved(self.cube))
+                        print("No se encontró solución")
+                elif query == 2:
+                    starTime = time.time_ns()
+                    result = self.AdlereroGuineoSearch(GAHeuristics.Heuristic2)
+                    end = time.time_ns()
+                    if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
+                        print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
+                    else:
+                        print(self.is_solved(self.cube))
+                        print("No se encontró solución")
+                else:
+                    starTime = time.time_ns()
+                    result = self.AdlereroGuineoSearch(GAHeuristics.corners_edges_heuristic)
+                    end = time.time_ns()
+                    if result:
+                        timeofop = (end - starTime) // 1_000_000
+                        final_time = self.show_time(timeofop) 
+                        print("Path encontrado hasta solución: ", result)
+                        print("Tiempo de resolución: ", final_time)
+                    else:
+                        print(self.is_solved(self.cube))
+                        print("No se encontró solución")
             elif choice == 5:
                 print("\n\033[1;36mSeleccionó la opción 'Hacer Scramble'\033[0m")
                 query = input("\n¿Cuantos movimientos aleatorios desea realizar? ")
@@ -593,7 +795,8 @@ class GACube:
                 self.shuffle()
             elif choice == 0:
                 print("\n\033[1;31mSaliendo...\033[0m")
-                break
+                flag = False
+
 
 
 
