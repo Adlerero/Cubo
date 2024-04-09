@@ -5,7 +5,7 @@ class NodeB:
         self.path = []
 
     def calculate_heuristic(self, heuristic):
-        self.heuristics_value = heuristic(self.path)
+        self.heuristics_value = heuristic(self.cube)
 
 
     def __lt__(self, other):
@@ -13,7 +13,7 @@ class NodeB:
             return False
         return self.heuristics_value < other.heuristics_value
         
-    
+    """
     def __gt__(self, other):
         if not isinstance(other, NodeB):
             return False
@@ -24,6 +24,7 @@ class NodeB:
         if not isinstance(other, NodeB):
             return False
         return self.heuristics_value == other.heuristics_value
+    """
     
 
 class NodeAStar(NodeB):

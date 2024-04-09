@@ -9,20 +9,26 @@ import time
 class GAHeuristics:
     @staticmethod
     def Heuristic1(cube):
-        #Heuristica prueba
-        '''proporciona una estimación de cuán lejos está el cubo de su estado objetivo. 
-            Cuanto menor sea el valor devuelto por la heurística, más cerca estará el cubo 
-            de estar completamente resuelto.'''
-        # Cuenta el número de aristas y centros que no están en su posición correcta
-        count = 0
-        # Asumiendo que cada cara del cubo debe tener un color único, definido por la primera pieza de esa cara
-        for i in range(6):  # 6 caras
-            face_color = cube[i][0][0]  # Color objetivo para esta cara
-            for j in range(3):  # Cada fila en una cara
-                for k in range(3):  # Cada columna en una fila
-                    if cube[i][j][k] != face_color:
-                        count += 1
-        return count
+        """
+        Calcula un valor heurístico para el cubo de Rubik basado en el número de
+        piezas que no están en su lugar correcto. Un menor valor heurístico indica
+        más piezas en su lugar correcto, con el valor más bajo posible indicando
+        que el cubo está resuelto.
+        """
+        max_heuristic_value = 54  # Máximo teórico para un cubo 3x3
+        correct_pieces = 0
+
+        # Iteramos a través de cada cara del cubo
+        for face in cube:
+            # Comparamos cada pieza de la cara con el color del centro para ver si está en su lugar correcto
+            for row in face:
+                for color in row:
+                    if color == face[1][1]:  # El centro siempre está en [1][1] para cada cara
+                        correct_pieces += 1
+
+        heuristic_value = max_heuristic_value - correct_pieces
+        print(heuristic_value, end=" ")
+        return heuristic_value
     
     @staticmethod
     def Heuristic2(path):

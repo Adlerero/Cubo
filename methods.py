@@ -3,6 +3,7 @@ from cube import GACube
 import copy
 from collections import deque
 from queue import PriorityQueue
+import heapq
 
 class GAMethods:
     def __init__(self, GACube):
@@ -43,13 +44,15 @@ class GAMethods:
     def Best_First_Search(self, heuristic):
         visited = set()
         start_node = NodeB(copy.deepcopy(self.GACube.cube))
-        pq = PriorityQueue()
-        pq.put(copy.deepcopy(start_node))
+        solved = GACube()
+        solved_node = NodeB(copy.deepcopy(solved.cube))
+        pq = []
+        heapq.heappush(pq, (start_node.heuristics_value, copy.deepcopy(start_node)))
         valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]
 
         while pq:
-            curr_cube = pq.get()
-            if curr_cube.cube == self.GACube.cube_solved:
+            curr_cube = heapq.heappop(pq)[1]
+            if curr_cube.cube == solved_node.cube:
                 self.GACube.cube = curr_cube.cube
                 return True, curr_cube.path
 
@@ -73,7 +76,8 @@ class GAMethods:
                 # comprueba si si crear nuevo arreglo
                 #print(len(neighbor.path), "-", neighbor.heuristics_value, end=" ")
                 if self.cube_to_tuple(neighbor.cube) not in visited:
-                    pq.put(copy.deepcopy(neighbor))
+                    heapq.heappush(pq, (neighbor.heuristics_value, copy.deepcopy(neighbor)))
+                    #pq.put(copy.deepcopy(neighbor))
                     visited.add(self.cube_to_tuple(neighbor.cube))
 
         return False
