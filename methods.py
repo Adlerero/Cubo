@@ -135,6 +135,14 @@ class GAMethods:
             
             ForwardVisited.add(self.cube_to_tuple(steph_curry_node.cube))
             
+            #backward 
+            purdy_node = final_queue.get()
+            if purdy_node.cube == self.GACube.cube:
+                self.GACube.cube = purdy_node.cube
+                return True, purdy_node.path
+            
+            BackwardVisited.add(self.cube_to_tuple(purdy_node.cube))
+            
             for move in valid_moves:
                 temp_cube = GACube()
                 temp_cube.cube = copy.deepcopy(steph_curry_node.cube)
@@ -148,13 +156,6 @@ class GAMethods:
                     ForwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
 
 
-            #backward 
-            purdy_node = final_queue.get()
-            if purdy_node.cube == self.GACube.cube:
-                self.GACube.cube = purdy_node.cube
-                return True, purdy_node.path
-            
-            BackwardVisited.add(self.cube_to_tuple(purdy_node.cube))
             
             for move in valid_moves:
                 temp_cube = GACube()
