@@ -126,7 +126,7 @@ class GAMethods:
         final_queue.put((goal_node))
         valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]  
         
-        while not source_queue.empty():
+        while not source_queue.empty() and not final_queue.empty():
             #forward
             steph_curry_node = source_queue.get()
             if steph_curry_node.cube == self.GACube.cube_solved:
@@ -146,7 +146,7 @@ class GAMethods:
                 if self.cube_to_tuple(friendlyNeighbor.cube) not in ForwardVisited:
                     source_queue.put((friendlyNeighbor))
                     ForwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
-        while not final_queue.empty():
+
             #backward 
             purdy_node = final_queue.get()
             if purdy_node.cube == self.GACube.cube:
