@@ -167,10 +167,10 @@ class GAMethods:
                 if self.cube_to_tuple(friendlyNeighbor.cube) not in BackwardVisited:
                     final_queue.put((friendlyNeighbor))
                     BackwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
-            
+            '''
             #Cojunto que guarda únicamente los elementos que aparecen en ambos conjuntos 
             intersection = set(ForwardVisited) & set(BackwardVisited) #Ampersand (&) es un símbolo de intersección
             if intersection:
                 print("Intersección en el movimiento: ", move)
-                    
+            '''        
         return False, None
