@@ -9,6 +9,22 @@ import time
 class GAHeuristics:
     @staticmethod
     def Heuristic1(cube):
+        # Suponemos que cada pieza debería estar en la cara del color del centro
+        target_positions = {color: idx for idx, color in enumerate([0, 1, 2, 3, 4, 5])}
+        piece_misplacements = 0
+
+        for face_idx, face in enumerate(cube):
+            center_color = face[1][1]
+            for row in face:
+                for color in row:
+                    # Si el color de la pieza no coincide con el color del centro de su cara actual
+                    if target_positions[color] != face_idx:
+                        piece_misplacements += 1
+
+        return piece_misplacements
+
+    @staticmethod
+    def Heuristic11(cube): #Colores incorrectos
         """
         Calcula un valor heurístico para el cubo de Rubik basado en el número de
         piezas que no están en su lugar correcto. Un menor valor heurístico indica
@@ -27,14 +43,56 @@ class GAHeuristics:
                         correct_pieces += 1
 
         heuristic_value = max_heuristic_value - correct_pieces
-        print(heuristic_value, end=" ")
+        #print(heuristic_value, end=" ")
         return heuristic_value
     
     @staticmethod
-    def Heuristic2(path):
+    def HeuristicPath(path):
         #print("entra en len ", len(path))
         return len(path)
     
+
+    @staticmethod
+    def Heuristic2(cube):#Manhattan distance
+        # Suponiendo que el color de la posición central de cada cara es el correcto para toda la cara.
+        target_positions = {color: idx for idx, color in enumerate([0, 1, 2, 3, 4, 5])} # color: posición esperada
+        distance = 0
+
+        # Iterar sobre cada cara y cada pieza en la cara
+        for face_idx, face in enumerate(cube):
+            for row in face:
+                for color in row:
+                    # Calcular la distancia basada en la discrepancia de color
+                    correct_face = target_positions[color]
+                    if correct_face != face_idx:
+                        distance += 1  # Aumentar por simplificación; cada error cuenta como 1
+
+        return distance
+    
+
+    def Heuristic3(cube): #Caras resueltas
+        solved_faces = 0
+
+        for face in cube:
+            # Asumimos que la cara está resuelta hasta probar lo contrario
+            is_solved = True
+            target_color = face[0][0]  # El color objetivo para toda la cara
+            for row in face:
+                for color in row:
+                    if color != target_color:
+                        is_solved = False
+                        break
+                if not is_solved:
+                    break
+
+            if is_solved:
+                solved_faces += 1
+
+        # Podemos hacer que el valor heurístico sea más bajo para mejor estado,
+        # así que devolvemos el negativo de las caras resueltas (o puedes devolver un valor basado en las caras no resueltas)
+        return -solved_faces
+
+
     @staticmethod
     def corners_edges_heuristic(cube):
         # Calcula la cantidad mínima de movimientos necesarios para solucionar todas las esquinas
