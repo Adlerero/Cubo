@@ -1,4 +1,6 @@
-#Adlerero & Guineote inc.
+# Adler Antonio Calvillo Arellano
+# Jared Lopez García
+
 import random
 import copy
 

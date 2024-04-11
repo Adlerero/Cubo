@@ -1,3 +1,6 @@
+# Adler Antonio Calvillo Arellano
+# Jared Lopez García
+
 class NodeB:
     def __init__(self, cube):
         self.cube = cube
@@ -13,19 +16,6 @@ class NodeB:
             return False
         return self.heuristics_value < other.heuristics_value
         
-    """
-    def __gt__(self, other):
-        if not isinstance(other, NodeB):
-            return False
-        
-        return self.heuristics_value > other.heuristics_value
-    
-    def __eq__(self, other):
-        if not isinstance(other, NodeB):
-            return False
-        return self.heuristics_value == other.heuristics_value
-    """
-    
 
 class NodeAStar(NodeB):
     def __init__(self, cube, distance = 0):

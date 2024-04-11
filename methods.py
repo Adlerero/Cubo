@@ -1,3 +1,6 @@
+# Adler Antonio Calvillo Arellano
+# Jared Lopez García
+
 from nodes import NodeB, NodeAStar, NodeABiStar
 from cube import GACube
 import copy

@@ -1,10 +1,5 @@
-#Adlerero & Guineote inc.
-import random
-import os
-import copy
-from collections import deque
-from queue import PriorityQueue
-import time
+# Adler Antonio Calvillo Arellano
+# Jared Lopez García
 
 class GAHeuristics:    
     @staticmethod
@@ -114,7 +109,7 @@ class GAHeuristics:
         # así que devolvemos el negativo de las caras resueltas (o puedes devolver un valor basado en las caras no resueltas)
         return count - solved_faces
 
-
+    """
     @staticmethod
     def HeuristicEdgesAndCorners(cube):
          #Heuristica que cuenta las aristas y esquinas. en su posicion correcta. No solo en cuanto a color.
@@ -197,4 +192,4 @@ class GAHeuristics:
     def HeuristicPath(path):
         #print("entra en len ", len(path))
         return len(path)
-    
+    """
