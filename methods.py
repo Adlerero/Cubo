@@ -1,9 +1,10 @@
-from nodes import NodeB, NodeAStar
+from nodes import NodeB, NodeAStar, NodeIDAStar
 from cube import GACube
 import copy
 from collections import deque
 from queue import PriorityQueue
 import heapq
+import itertools
 
 class GAMethods:
     def __init__(self, GACube):
@@ -48,40 +49,36 @@ class GAMethods:
         solved_node = NodeB(copy.deepcopy(solved.cube))
         pq = []
         heapq.heappush(pq, (start_node.heuristics_value, copy.deepcopy(start_node)))
+
         valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]
 
+        visited.add(self.cube_to_tuple(start_node.cube))
         while pq:
-            curr_cube = heapq.heappop(pq)[1]
-            if curr_cube.cube == solved_node.cube:
+            _, curr_cube = heapq.heappop(pq)
+            print("\n", curr_cube.heuristics_value)
+            
+            if self.cube_to_tuple(curr_cube.cube) == self.cube_to_tuple(solved_node.cube):
                 self.GACube.cube = curr_cube.cube
                 return True, curr_cube.path
 
-            #print()
-            #print(cube_str)
-            #print(pq.qsize())
-            #print(len(visited))
-            #print(len(curr_cube.path))
-            #print("-------")
-            #if cube_str in visited:
-            #    continue
-            visited.add(tuple(self.cube_to_tuple(curr_cube.cube)))
-            
             for move in valid_moves:
-                temp = GACube()
-                temp.cube = copy.deepcopy(curr_cube.cube)
-                getattr(temp, move)()
-                neighbor = NodeB(copy.deepcopy(temp.cube))
-                neighbor.path = copy.deepcopy(curr_cube.path) + [move]
-                neighbor.calculate_heuristic(heuristic)
-                # comprueba si si crear nuevo arreglo
-                #print(len(neighbor.path), "-", neighbor.heuristics_value, end=" ")
+                self.GACube.cube = copy.deepcopy(curr_cube.cube)
+                getattr(self.GACube, move)()
+                neighbor = NodeB(copy.deepcopy(self.GACube.cube))
+                
                 if self.cube_to_tuple(neighbor.cube) not in visited:
-                    heapq.heappush(pq, (neighbor.heuristics_value, copy.deepcopy(neighbor)))
-                    #pq.put(copy.deepcopy(neighbor))
+                    neighbor.calculate_heuristic(heuristic)
+                    neighbor.path = copy.deepcopy(curr_cube.path) + [move]
                     visited.add(self.cube_to_tuple(neighbor.cube))
+                    heapq.heappush(pq, (neighbor.heuristics_value, copy.deepcopy(neighbor)))
+                    
 
         return False
 
+
+#Que tal si le doy prioridad cuando empaten nodos, a los nodos con path mas chicos?
+#O que haya un limite de path.
+#Revisar heuristica
 
 
     def A_Star(self, heuristic):
@@ -90,26 +87,27 @@ class GAMethods:
         pq = PriorityQueue()
         pq.put((start_node))  # Usamos una tupla para asegurar la comparación correcta.
         valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]
+        visited.add(self.cube_to_tuple(start_node.cube))
 
         while not pq.empty():
             current_node = pq.get()
-            if current_node.cube == self.GACube.cube_solved:
+            if self.cube_to_tuple(current_node.cube) == self.cube_to_tuple(self.GACube.cube_solved):
                 self.GACube.cube = current_node.cube
                 return True, current_node.path
 
-            visited.add(self.cube_to_tuple(current_node.cube))
 
             for move in valid_moves:
-                temp_cube = GACube()
-                temp_cube.cube = copy.deepcopy(current_node.cube)
-                getattr(temp_cube, move)()
-                neighbor = NodeAStar(copy.deepcopy(temp_cube.cube), distance=current_node.distance + 1)
-                neighbor.path = copy.deepcopy(current_node.path) + [move]
-                neighbor.calculate_heuristic(heuristic)
+                self.GACube.cube = copy.deepcopy(current_node.cube)
+                getattr(self.GACube, move)()
+                neighbor = NodeAStar(copy.deepcopy(self.GACube.cube), distance=current_node.distance + 1)
+                
                 
                 if self.cube_to_tuple(neighbor.cube) not in visited:
-                    pq.put((neighbor))  # Añade el nodo con su valor de f(n).
+                    neighbor.path = copy.deepcopy(current_node.path) + [move]
+                    neighbor.calculate_heuristic(heuristic)
                     visited.add(self.cube_to_tuple(neighbor.cube))
+                    pq.put((neighbor))  # Añade el nodo con su valor de f(n).
+
 
         return False
 
@@ -175,3 +173,36 @@ class GAMethods:
                 print("Intersección en el movimiento: ", move)
             '''        
         return False, None
+
+    def IDA_Star(self, heuristic):
+        def search(node, g, threshold):
+            f = g + heuristic(node.cube)
+            if f > threshold:
+                return f
+            if self.cube_to_tuple(node.cube) == self.cube_to_tuple(self.GACube.cube_solved):
+                return (True, node.path)
+            minimum = float('inf')
+            for move in valid_moves:
+                new_cube = GACube()
+                new_cube.cube = copy.deepcopy(node.cube)
+                getattr(new_cube, move)()
+                new_path = node.path + [move]
+                new_node = NodeIDAStar(new_cube.cube, new_path, g+1)
+                new_node.calculate_heuristic(heuristic)
+                temp = search(new_node, g+1, threshold)
+                if type(temp) is tuple:
+                    return temp  # Retorna el resultado si es una tupla, lo que indica éxito
+                if temp < minimum:
+                    minimum = temp
+            return minimum
+
+        threshold = heuristic(self.GACube.cube)
+        start_node = NodeIDAStar(copy.deepcopy(self.GACube.cube))
+        valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]
+        while True:
+            temp = search(start_node, 0, threshold)
+            if type(temp) is tuple:
+                return temp  # (True, path)
+            if temp == float('inf'):
+                return False  # No se encontró solución
+            threshold = temp  # Incrementa el umbral

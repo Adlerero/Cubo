@@ -41,3 +41,17 @@ class NodeAStar(NodeB):
         return self.f < other.f
 
         
+class NodeIDAStar(NodeB):
+    def __init__(self, cube, path=[], cost=0):
+        super().__init__(cube)
+        self.path = path
+        self.cost = cost  # g(n): Costo hasta el momento
+
+    def calculate_heuristic(self, heuristic):
+        super().calculate_heuristic(heuristic)
+        self.f = self.cost + self.heuristics_value  # f(n) = g(n) + h(n)
+
+    def __lt__(self, other):
+        if not isinstance(other, NodeIDAStar):
+            return NotImplemented
+        return self.f < other.f

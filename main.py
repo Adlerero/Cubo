@@ -39,7 +39,7 @@ class Main:
             if choice > 10:
                 print("Invalido")
             elif choice < 0:
-                print("Innvalido") 
+                print("Invalido") 
             elif choice == 1:
                 print("\n\033[1;36mSeleccionó la opción 'Resolver mediante Best-First-Search'\033[0m")
                 query = input("\n¿Que heurística desea usar? Escriba 1, 2 o 3. ")
@@ -75,7 +75,7 @@ class Main:
                         print("No se encontró solución")
                 else:
                     starTime = time.time_ns()
-                    result = methods.Best_First_Search(GAHeuristics.corners_edges_heuristic)
+                    result = methods.Best_First_Search(GAHeuristics.Heuristic3)
                     end = time.time_ns()
                     if result:
                         timeofop = (end - starTime) // 1_000_000
