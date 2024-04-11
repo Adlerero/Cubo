@@ -55,11 +55,10 @@ class GAMethods:
         visited.add(self.cube_to_tuple(start_node.cube))
         while pq:
             _, curr_cube = heapq.heappop(pq)
-            print("\n", curr_cube.heuristics_value)
             
             if self.cube_to_tuple(curr_cube.cube) == self.cube_to_tuple(solved_node.cube):
                 self.GACube.cube = curr_cube.cube
-                return True, curr_cube.path
+                return curr_cube.path
 
             for move in valid_moves:
                 self.GACube.cube = copy.deepcopy(curr_cube.cube)
@@ -73,7 +72,7 @@ class GAMethods:
                     heapq.heappush(pq, (neighbor.heuristics_value, copy.deepcopy(neighbor)))
                     
 
-        return False
+        return None
 
 
 #Que tal si le doy prioridad cuando empaten nodos, a los nodos con path mas chicos?
@@ -93,7 +92,7 @@ class GAMethods:
             current_node = pq.get()
             if self.cube_to_tuple(current_node.cube) == self.cube_to_tuple(self.GACube.cube_solved):
                 self.GACube.cube = current_node.cube
-                return True, current_node.path
+                return current_node.path
 
 
             for move in valid_moves:
@@ -109,7 +108,7 @@ class GAMethods:
                     pq.put((neighbor))  # Añade el nodo con su valor de f(n).
 
 
-        return False
+        return None
 
     
     def AdlereroGuineoSearch(self, heuristic):

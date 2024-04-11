@@ -29,14 +29,13 @@ class Main:
             print("\033[1;32m 7. Conocer Heuristicas\033[0m")
             print("\033[1;32m 8. Imprimir Cubo\033[0m")
             print("\033[1;32m 9. Estado del cubo\033[0m")
-            print("\033[1;32m 10. Hacer shuffle\033[0m")
             print("\033[1;31m 0. Salir\033[0m") #Imprime la opción de salir en color rojo
             choice = input("\n\033[1mSeleccione una opción: \033[0m")
             while not choice.isdigit():
                 choice = input("\n\033[1mSeleccione una opción valida: \033[0m")
             choice = int(choice)
 
-            if choice > 10:
+            if choice > 9:
                 print("Invalido")
             elif choice < 0:
                 print("Invalido") 
@@ -133,7 +132,7 @@ class Main:
                         print("No se encontró solución")
                 else:
                     starTime = time.time_ns()
-                    result = methods.A_Star(GAHeuristics.corners_edges_heuristic)
+                    result = methods.A_Star(GAHeuristics.Heuristic3)
                     end = time.time_ns()
                     if result:
                         timeofop = (end - starTime) // 1_000_000
@@ -207,9 +206,6 @@ class Main:
             elif choice == 9:
                 print("\n\033[1;36mSeleccionó la opción 'Estado del Cubo'\033[0m")
                 print(cube.is_solved(cube.cube))
-            elif choice == 10:
-                print("\n\033[1;36mSeleccionó la opción 'Shuffle'\033[0m")
-                cube.shuffle()
             elif choice == 0:
                 print("\n\033[1;31mSaliendo...\033[0m")
                 flag = False

@@ -156,13 +156,6 @@ class GACube:
         for _ in range(3):
             self.move_B()
 
-    def shuffle(self):
-        shuffle_n = random.randint(50, 200)
-        for _ in range(shuffle_n):
-            random_n = random.randint(0, 11)
-            self.__make_move(random_n)
-        print("Shuffle aleatorio realizado con éxito!")
-
 
     #Realiza n movimientos aleatorios
     def scramble(self, n_movements):
