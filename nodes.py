@@ -40,18 +40,22 @@ class NodeAStar(NodeB):
     def __lt__(self, other):
         return self.f < other.f
 
-        
-class NodeIDAStar(NodeB):
-    def __init__(self, cube, path=[], cost=0):
+
+
+class NodeABiStar(NodeB):
+    def __init__(self, cube, distance=0, path=[]):
         super().__init__(cube)
-        self.path = path
-        self.cost = cost  # g(n): Costo hasta el momento
+        self.distance = distance
+        self.path = path.copy()  # Hacemos una copia del path para evitar mutaciones inesperadas
+        self.heuristic_value = -1  # Inicializa el valor heurístico a 0
+        #self.f = 0  # f(n) = g(n) + h(n), se inicializa aquí y se actualizará adecuadamente
 
     def calculate_heuristic(self, heuristic):
-        super().calculate_heuristic(heuristic)
-        self.f = self.cost + self.heuristics_value  # f(n) = g(n) + h(n)
+        super().calculate_heuristic(heuristic)  # Calcula h(n) usando la heurística.
+        self.f = self.distance + self.heuristics_value  # f(n) = g(n) + h(n)
 
     def __lt__(self, other):
-        if not isinstance(other, NodeIDAStar):
-            return NotImplemented
-        return self.f < other.f
+        if not isinstance(other, NodeB):
+            return False
+        return self.heuristics_value < other.heuristics_value
+        
