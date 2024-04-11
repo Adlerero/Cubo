@@ -75,11 +75,6 @@ class GAMethods:
         return None
 
 
-#Que tal si le doy prioridad cuando empaten nodos, a los nodos con path mas chicos?
-#O que haya un limite de path.
-#Revisar heuristica
-
-
     def A_Star(self, heuristic):
         visited = set()
         start_node = NodeAStar(copy.deepcopy(self.GACube.cube))
@@ -128,7 +123,7 @@ class GAMethods:
             steph_curry_node = source_queue.get()
             if steph_curry_node.cube == self.GACube.cube_solved:
                 self.GACube.cube = steph_curry_node.cube
-                return True, steph_curry_node.path
+                return steph_curry_node.path, "forw"
             
             ForwardVisited.add(self.cube_to_tuple(steph_curry_node.cube))
             
@@ -136,10 +131,23 @@ class GAMethods:
             purdy_node = final_queue.get()
             if purdy_node.cube == self.GACube.cube:
                 self.GACube.cube = purdy_node.cube
-                return True, purdy_node.path
+                return purdy_node.path, "back"
             
             BackwardVisited.add(self.cube_to_tuple(purdy_node.cube))
             
+            
+            intersection = ForwardVisited.intersection(BackwardVisited)
+            if intersection:
+                intersection_state = intersection.pop()
+                forward_path = steph_curry_node.path
+                backward_path = purdy_node.path[::-1] 
+                combined_path = forward_path + backward_path
+                self.GACube.cube = copy.deepcopy(intersection_state)
+                #for move in combined_path:
+                #    getattr(self.GACube, move)()
+                return combined_path, "Intersecciooooon"
+            
+            #Expansión hacia adelante
             for move in valid_moves:
                 temp_cube = GACube()
                 temp_cube.cube = copy.deepcopy(steph_curry_node.cube)
@@ -153,7 +161,7 @@ class GAMethods:
                     ForwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
 
 
-            
+            #Expansión hacia atrás
             for move in valid_moves:
                 temp_cube = GACube()
                 temp_cube.cube = copy.deepcopy(purdy_node.cube)
@@ -165,10 +173,5 @@ class GAMethods:
                 if self.cube_to_tuple(friendlyNeighbor.cube) not in BackwardVisited:
                     final_queue.put((friendlyNeighbor))
                     BackwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
-            '''
-            #Cojunto que guarda únicamente los elementos que aparecen en ambos conjuntos 
-            intersection = set(ForwardVisited) & set(BackwardVisited) #Ampersand (&) es un símbolo de intersección
-            if intersection:
-                print("Intersección en el movimiento: ", move)
-            '''        
+            
         return False, None
