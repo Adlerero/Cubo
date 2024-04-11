@@ -9,26 +9,8 @@ import time
 class GAHeuristics:    
     @staticmethod
     def Heuristic1(cube):
-        #Heuristica que cuenta las aristas y esquinas. en su posicion correcta. No solo en cuanto a color.
+        #Heuristica que cuenta las aristas en su posicion correcta. No solo en cuanto a color.
         count = 0
-        #8 esquinas
-        if cube[0][0][0] != cube[0][1][1] or cube[3][0][2] != cube[3][1][1] or cube[4][0][0] != cube[4][1][1]:
-            count += 1
-        if cube[0][0][2] != cube[0][1][1] or cube[3][0][0] != cube[3][1][1] or cube[2][0][2] != cube[2][1][1]:
-            count += 1
-        if cube[0][2][0] != cube[0][1][1] or cube[1][0][0] != cube[1][1][1] or cube[4][0][2] != cube[4][1][1]:
-            count += 1
-        if cube[0][2][2] != cube[0][1][1] or cube[2][0][0] != cube[2][1][1] or cube[1][0][2] != cube[1][1][1]:
-            count += 1
-        if cube[5][0][0] != cube[5][1][1] or cube[1][2][0] != cube[1][1][1] or cube[4][2][2] != cube[4][1][1]:
-            count += 1
-        if cube[5][2][0] != cube[5][1][1] or cube[1][2][2] != cube[1][1][1] or cube[2][2][0] != cube[2][1][1]:
-            count += 1
-        if cube[5][0][2] != cube[5][1][1] or cube[3][2][2] != cube[3][1][1] or cube[4][2][0] != cube[4][1][1]:
-            count += 1
-        if cube[5][2][2] != cube[5][1][1] or cube[3][2][0] != cube[3][1][1] or cube[2][2][2] != cube[2][1][1]:
-            count += 1
-
         #12 aristas
         if cube[0][2][1] != cube[0][1][1] or cube[1][0][1] != cube[1][1][1]:
             count += 1
@@ -134,8 +116,27 @@ class GAHeuristics:
 
 
     @staticmethod
-    def HeuristicEdges(cube):
+    def HeuristicEdgesAndCorners(cube):
+         #Heuristica que cuenta las aristas y esquinas. en su posicion correcta. No solo en cuanto a color.
         count = 0
+        #8 esquinas
+        if cube[0][0][0] != cube[0][1][1] or cube[3][0][2] != cube[3][1][1] or cube[4][0][0] != cube[4][1][1]:
+            count += 1
+        if cube[0][0][2] != cube[0][1][1] or cube[3][0][0] != cube[3][1][1] or cube[2][0][2] != cube[2][1][1]:
+            count += 1
+        if cube[0][2][0] != cube[0][1][1] or cube[1][0][0] != cube[1][1][1] or cube[4][0][2] != cube[4][1][1]:
+            count += 1
+        if cube[0][2][2] != cube[0][1][1] or cube[2][0][0] != cube[2][1][1] or cube[1][0][2] != cube[1][1][1]:
+            count += 1
+        if cube[5][0][0] != cube[5][1][1] or cube[1][2][0] != cube[1][1][1] or cube[4][2][2] != cube[4][1][1]:
+            count += 1
+        if cube[5][2][0] != cube[5][1][1] or cube[1][2][2] != cube[1][1][1] or cube[2][2][0] != cube[2][1][1]:
+            count += 1
+        if cube[5][0][2] != cube[5][1][1] or cube[3][2][2] != cube[3][1][1] or cube[4][2][0] != cube[4][1][1]:
+            count += 1
+        if cube[5][2][2] != cube[5][1][1] or cube[3][2][0] != cube[3][1][1] or cube[2][2][2] != cube[2][1][1]:
+            count += 1
+
         #12 aristas
         if cube[0][2][1] != cube[0][1][1] or cube[1][0][1] != cube[1][1][1]:
             count += 1
