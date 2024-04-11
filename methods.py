@@ -1,10 +1,9 @@
-from nodes import NodeB, NodeAStar, NodeIDAStar
+from nodes import NodeB, NodeAStar, NodeABiStar
 from cube import GACube
 import copy
 from collections import deque
 from queue import PriorityQueue
 import heapq
-import itertools
 
 class GAMethods:
     def __init__(self, GACube):
@@ -107,71 +106,70 @@ class GAMethods:
 
     
     def AdlereroGuineoSearch(self, heuristic):
-        #A* Bidirectional
-        ForwardVisited = set()  #En este conjunto se guardan los estados visitados en la busqueda hacia adelante 
-        BackwardVisited = set() #En este se guardan los estados visitados en la busqueda hacia atras
-        start_node = NodeAStar(copy.deepcopy(self.GACube.cube))
-        goal_node = NodeAStar(copy.deepcopy(self.GACube.cube_solved))
+        ForwardVisited = {}  # Diccionario para rastrear estados y caminos en la búsqueda hacia adelante
+        BackwardVisited = {}  # Diccionario para rastrear estados y caminos en la búsqueda hacia atrás
+        start_node = NodeABiStar(copy.deepcopy(self.GACube.cube), distance=0, path=[])
+        goal_node = NodeABiStar(copy.deepcopy(self.GACube.cube_solved), distance=0, path=[])
         source_queue = PriorityQueue()
         final_queue = PriorityQueue()
-        source_queue.put((start_node))
-        final_queue.put((goal_node))
-        valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]  
+        source_queue.put((0, start_node))
+        final_queue.put((0, goal_node))
+        valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]
+
+        def invert_move(move):
+            return move[:-1] if move.endswith('i') else move + 'i'
         
         while not source_queue.empty() and not final_queue.empty():
-            #forward
-            steph_curry_node = source_queue.get()
+            #Forward
+            _, steph_curry_node = source_queue.get()
+            forward_state = self.cube_to_tuple(steph_curry_node.cube)
+            ForwardVisited[forward_state] = steph_curry_node.path
+
             if steph_curry_node.cube == self.GACube.cube_solved:
-                self.GACube.cube = steph_curry_node.cube
                 return steph_curry_node.path, "forw"
-            
-            ForwardVisited.add(self.cube_to_tuple(steph_curry_node.cube))
-            
-            #backward 
-            purdy_node = final_queue.get()
+
+            #Backward
+            _, purdy_node = final_queue.get()
+            backward_state = self.cube_to_tuple(purdy_node.cube)
+            BackwardVisited[backward_state] = purdy_node.path
+
             if purdy_node.cube == self.GACube.cube:
-                self.GACube.cube = purdy_node.cube
                 return purdy_node.path, "back"
-            
-            BackwardVisited.add(self.cube_to_tuple(purdy_node.cube))
-            
-            
-            intersection = ForwardVisited.intersection(BackwardVisited)
+
+            #Intersecciones
+            intersection = set(ForwardVisited.keys()).intersection(set(BackwardVisited.keys()))
             if intersection:
                 intersection_state = intersection.pop()
-                forward_path = steph_curry_node.path
-                backward_path = purdy_node.path[::-1] 
-                combined_path = forward_path + backward_path
-                self.GACube.cube = copy.deepcopy(intersection_state)
-                #for move in combined_path:
-                #    getattr(self.GACube, move)()
-                return combined_path, "Intersecciooooon"
-            
-            #Expansión hacia adelante
-            for move in valid_moves:
-                temp_cube = GACube()
-                temp_cube.cube = copy.deepcopy(steph_curry_node.cube)
-                getattr(temp_cube, move)()
-                friendlyNeighbor = NodeAStar(copy.deepcopy(temp_cube.cube), distance=steph_curry_node.distance + 1)
-                friendlyNeighbor.path = copy.deepcopy(steph_curry_node.path) + [move]
-                friendlyNeighbor.calculate_heuristic(heuristic)
-                
-                if self.cube_to_tuple(friendlyNeighbor.cube) not in ForwardVisited:
-                    source_queue.put((friendlyNeighbor))
-                    ForwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
+                forward_path = ForwardVisited[intersection_state]
+                backward_path = BackwardVisited[intersection_state]
+                backward_path_inverted = [invert_move(move) for move in reversed(backward_path)]
+                combined_path = forward_path + backward_path_inverted
+                # Aplicar movimientos al cubo para verificar si se resuelve:
+                if self.apply_combined_path(combined_path):
+                    return combined_path, "Cubo resuelto"
+                else:
+                    return combined_path, "Cubo no resuelto"
 
+            # Expandir nodos
+            for move_list, current_node, paths in ((valid_moves, steph_curry_node, ForwardVisited), (valid_moves, purdy_node, BackwardVisited)):
+                for move in move_list:
+                    temp_cube = GACube()
+                    temp_cube.cube = copy.deepcopy(current_node.cube)
+                    getattr(temp_cube, move)()
+                    new_state = self.cube_to_tuple(temp_cube.cube)
+                    new_path = current_node.path + [move]
+                    if new_state not in paths:
+                        friendly_neighbor = NodeABiStar(copy.deepcopy(temp_cube.cube), distance=current_node.distance + 1, path=new_path)
+                        friendly_neighbor.calculate_heuristic(heuristic)
+                        queue = source_queue if current_node == steph_curry_node else final_queue
+                        queue.put((friendly_neighbor.f, friendly_neighbor))
+                        paths[new_state] = new_path
 
-            #Expansión hacia atrás
-            for move in valid_moves:
-                temp_cube = GACube()
-                temp_cube.cube = copy.deepcopy(purdy_node.cube)
-                getattr(temp_cube, move)()
-                friendlyNeighbor = NodeAStar(copy.deepcopy(temp_cube.cube), distance=purdy_node.distance + 1)
-                friendlyNeighbor.path = copy.deepcopy(purdy_node.path) + [move]
-                friendlyNeighbor.calculate_heuristic(heuristic)
-                
-                if self.cube_to_tuple(friendlyNeighbor.cube) not in BackwardVisited:
-                    final_queue.put((friendlyNeighbor))
-                    BackwardVisited.add(self.cube_to_tuple(friendlyNeighbor.cube))
-            
-        return False, None
+        return False, "No path found"
+
+    def apply_combined_path(self, moves):
+        for move in moves:
+            move_func = getattr(self.GACube, move, None)
+            if move_func:
+                move_func()
+        return self.GACube.is_solved(self.GACube.cube)
