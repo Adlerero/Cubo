@@ -106,6 +106,7 @@ class GAMethods:
 
     
     def AdlereroGuineoSearch(self, heuristic):
+        #A* Bidireccional
         ForwardVisited = {}  # Diccionario para rastrear estados y caminos en la búsqueda hacia adelante
         BackwardVisited = {}  # Diccionario para rastrear estados y caminos en la búsqueda hacia atrás
         start_node = NodeABiStar(copy.deepcopy(self.GACube.cube), distance=0, path=[])
