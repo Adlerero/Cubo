@@ -127,7 +127,7 @@ class GAMethods:
             ForwardVisited[forward_state] = steph_curry_node.path
 
             if steph_curry_node.cube == self.GACube.cube_solved:
-                return steph_curry_node.path, "forw"
+                return steph_curry_node.path, "Encotrado por busqueda hacia adelante"
 
             #Backward
             _, purdy_node = final_queue.get()
@@ -135,7 +135,7 @@ class GAMethods:
             BackwardVisited[backward_state] = purdy_node.path
 
             if purdy_node.cube == self.GACube.cube:
-                return purdy_node.path, "back"
+                return purdy_node.path, "Encotrado por busqueda hacia atrás"
 
             #Intersecciones
             intersection = set(ForwardVisited.keys()).intersection(set(BackwardVisited.keys()))
@@ -147,9 +147,9 @@ class GAMethods:
                 combined_path = forward_path + backward_path_inverted
                 # Aplicar movimientos al cubo para verificar si se resuelve:
                 if self.apply_combined_path(combined_path):
-                    return combined_path, "Cubo resuelto"
+                    return combined_path
                 else:
-                    return combined_path, "Cubo no resuelto"
+                    return combined_path
 
             # Expandir nodos
             for move_list, current_node, paths in ((valid_moves, steph_curry_node, ForwardVisited), (valid_moves, purdy_node, BackwardVisited)):
@@ -166,7 +166,7 @@ class GAMethods:
                         queue.put((friendly_neighbor.f, friendly_neighbor))
                         paths[new_state] = new_path
 
-        return False, "No path found"
+        return False
 
     def apply_combined_path(self, moves):
         for move in moves:
