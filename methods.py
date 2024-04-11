@@ -172,36 +172,3 @@ class GAMethods:
                 print("Intersección en el movimiento: ", move)
             '''        
         return False, None
-
-    def IDA_Star(self, heuristic):
-        def search(node, g, threshold):
-            f = g + heuristic(node.cube)
-            if f > threshold:
-                return f
-            if self.cube_to_tuple(node.cube) == self.cube_to_tuple(self.GACube.cube_solved):
-                return (True, node.path)
-            minimum = float('inf')
-            for move in valid_moves:
-                new_cube = GACube()
-                new_cube.cube = copy.deepcopy(node.cube)
-                getattr(new_cube, move)()
-                new_path = node.path + [move]
-                new_node = NodeIDAStar(new_cube.cube, new_path, g+1)
-                new_node.calculate_heuristic(heuristic)
-                temp = search(new_node, g+1, threshold)
-                if type(temp) is tuple:
-                    return temp  # Retorna el resultado si es una tupla, lo que indica éxito
-                if temp < minimum:
-                    minimum = temp
-            return minimum
-
-        threshold = heuristic(self.GACube.cube)
-        start_node = NodeIDAStar(copy.deepcopy(self.GACube.cube))
-        valid_moves = ["move_R", "move_Ri", "move_L", "move_Li", "move_U", "move_Ui", "move_D", "move_Di", "move_F", "move_Fi", "move_B", "move_Bi"]
-        while True:
-            temp = search(start_node, 0, threshold)
-            if type(temp) is tuple:
-                return temp  # (True, path)
-            if temp == float('inf'):
-                return False  # No se encontró solución
-            threshold = temp  # Incrementa el umbral
